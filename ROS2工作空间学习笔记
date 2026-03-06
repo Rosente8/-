@@ -1,1 +1,29 @@
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws                                            //创建工作空间
+
+colcon build                                            //初始化工作空间
+
+cd src
+ros2 pkg create --build-type ament_cmake my_package     //源码空间创建包
+
+rosdep install --from-paths src --ignore-src -r -y      // 安装依赖
+ 
+colcon build                                            //编译工作空间
+
+source install/setup.bash                               //设置环境变量
+
+ros2 run my_package my_node                             //验证安装
+
+
+
+
+参数组合
+ros2 pkg create --build-type ament_python my_python_package              //创建Python包
+
+ros2 pkg create --dependencies rclpy std_msgs my_dependent_package       //创建带依赖的包
+
+ros2 pkg create --build-type ament_cmake my_cpp_package                  //创建C++包
+
+ros2 pkg create --build-type ament_cmake my_hybrid_package               //创建混合包（C++和Python）
+
 
