@@ -1,1 +1,8 @@
-
+conda create -n myenv python=3.8 //创建虚拟环境
+                                  #-n指定环境名
+conda activate myenv             //激活虚拟环境
+                                  # myenv: 要激活的环境名称
+conda env list                   //显示所有已创建的环境列表
+conda deactivate                 //退出虚拟环境 
+conda remove -n myenv --all      //删除虚拟环境
+                                  # --all: 删除环境及其所有内容
