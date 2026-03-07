@@ -1,1 +1,18 @@
+节点是ROS中的独立进程，每个节点通过名称（Name） 唯一标识，可发布/订阅话题、提供服务/调用服务，是ROS分布式系统的基本组成单元
 
+ros::init(argc, argv, "hello_node")                                        //初始化ROS系统
+ros::NodeHandle nh                                                         //创建节点句柄
+ros::Rate loop_rate(1)                                                     //设置循环频率
+
+#include <ros/ros.h>
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "hello_node");
+    ros::NodeHandle nh;
+    ros::Rate loop_rate(1);
+   while (ros::ok()) {
+        ROS_INFO("Hello World");                                            //打印 
+        ros::spinOnce();                                                    //处理回调（如有订阅/服务）
+        loop_rate.sleep();                                                  //按频率休眠
+    }
+    return 0;
+}
