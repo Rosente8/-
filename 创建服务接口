@@ -1,1 +1,46 @@
+1 创建.srv文件
+int64 a 
+int64 b 
+---
+int64 sum  
+
+2 在package.xml中添加message_generation依赖（用于生成服务代码）：
+<build_depend>message_generation</build_depend>
+<exec_depend>message_runtime</exec_depend>
+
+3 在CMakeLists.txt中配置服务生成：
+find_package(catkin REQUIRED COMPONENTS
+  rospy
+  std_msgs
+  message_generation
+)
+
+add_service_files(FILES AddTwoInts.srv)                                                             //指定.srv文件
+generate_messages(DEPENDENCIES std_msgs)                                                            //依赖std_msgs生成代码
+catkin_package(CATKIN_DEPENDS message_runtime)                                                      //打包依赖
+
+4 服务端节点实现
+核心逻辑：初始化ROS → 创建服务 → 定义回调函数处理请求 → 返回响应
+#include <ros/ros.h>
+#include "add_two_ints/AddTwoInts.h"                                                                // 生成的服务头文件
+bool add(add_two_ints::AddTwoInts::Request &req, add_two_ints::AddTwoInts::Response &res) {         // 回调函数：处理客户端请求
+    res.sum = req.a + req.b;                                                                        // 计算和
+    ROS_INFO("Request: x=%ld, y=%ld", (long int)req.a, (long int)req.b);
+    ROS_INFO("Sending back response: [%ld]", (long int)res.sum);
+    return true;                                                                                    // 表示服务执行成功
+}
+
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "add_two_ints_server");                                                   // 初始化节点
+    ros::NodeHandle n;                                                                              // 创建节点句柄
+    ros::ServiceServer service = n.advertiseService("add_two_ints", add);                           // 创建服务
+    ROS_INFO("Ready to add two ints.");
+    ros::spin();                                                                                    // 进入事件循环，等待请求
+    return 0;
+}
+
+
+
+
+
 
