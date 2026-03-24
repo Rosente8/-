@@ -1,1 +1,142 @@
+#浅拷贝：只复制对象的引用，两个变量指向同一块内存，修改一个会影响另一个
+#深拷贝：复制整个对象的数据，创建独立的内存空间，修改一个不会影响另一个
 
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+
+def demonstrate_shallow_vs_deep_copy():
+    """
+    演示深拷贝与浅拷贝的区别
+    """
+    # 创建测试图像
+    img = np.zeros((300, 300, 3), dtype=np.uint8)
+    # 添加一个简单的图案
+    cv.rectangle(img, (50, 50), (250, 250), (0, 255, 0), -1)  # 绿色矩形
+    cv.circle(img, (150, 150), 50, (0, 0, 255), -1)  # 红色圆形
+    
+    # 浅拷贝
+    shallow_copy = img  # 只是引用
+    # 深拷贝方法1：使用copy()方法
+    deep_copy1 = img.copy()
+    # 深拷贝方法2：使用np.copy()
+    deep_copy2 = np.copy(img)
+    
+    print("=" * 50)
+    print("内存地址分析：")
+    print(f"原图地址:      {id(img)}")
+    print(f"浅拷贝地址:    {id(shallow_copy)}")
+    print(f"深拷贝1地址:   {id(deep_copy1)}")
+    print(f"深拷贝2地址:   {id(deep_copy2)}")
+    
+    print("\n" + "=" * 50)
+    print("修改原图，观察拷贝结果变化：")
+    
+    # 修改原图：添加蓝色矩形
+    cv.rectangle(img, (100, 100), (200, 200), (255, 0, 0), -1)
+    
+    # 显示结果
+    fig, axes = plt.subplots(2, 2, figsize=(10, 10))
+    
+    axes[0, 0].imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
+    axes[0, 0].set_title('原图（已修改）')
+    axes[0, 0].axis('off')
+    
+    axes[0, 1].imshow(cv.cvtColor(shallow_copy, cv.COLOR_BGR2RGB))
+    axes[0, 1].set_title('浅拷贝（受原图影响）')
+    axes[0, 1].axis('off')
+    
+    axes[1, 0].imshow(cv.cvtColor(deep_copy1, cv.COLOR_BGR2RGB))
+    axes[1, 0].set_title('深拷贝1（独立数据）')
+    axes[1, 0].axis('off')
+    
+    axes[1, 1].imshow(cv.cvtColor(deep_copy2, cv.COLOR_BGR2RGB))
+    axes[1, 1].set_title('深拷贝2（独立数据）')
+    axes[1, 1].axis('off')
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return img, shallow_copy, deep_copy1
+
+def test_copy_on_threshold(img_original):
+    """
+    测试深浅拷贝对阈值处理的影响
+    """
+    # 转换为灰度图
+    if len(img_original.shape) == 3:
+        img_gray = cv.cvtColor(img_original, cv.COLOR_BGR2GRAY)
+    else:
+        img_gray = img_original
+    
+    # 创建不同的拷贝
+    shallow_copy = img_gray  # 浅拷贝
+    deep_copy = img_gray.copy()  # 深拷贝
+    
+    # 定义阈值函数
+    def threshold_operation(img, thresh=128):
+        _, result = cv.threshold(img, thresh, 255, cv.THRESH_BINARY)
+        return result
+    
+    # 对不同的拷贝进行阈值处理
+    result_shallow = threshold_operation(shallow_copy)
+    result_deep = threshold_operation(deep_copy)
+    
+    # 修改原图
+    img_gray[50:100, 50:100] = 0  # 将左上角区域变黑
+    
+    # 再次进行阈值处理
+    result_shallow_after = threshold_operation(shallow_copy)
+    result_deep_after = threshold_operation(deep_copy)
+    
+    # 显示对比
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    
+    axes[0, 0].imshow(img_gray, cmap='gray')
+    axes[0, 0].set_title('原图（已修改）')
+    axes[0, 0].axis('off')
+    
+    axes[0, 1].imshow(result_shallow, cmap='gray')
+    axes[0, 1].set_title('浅拷贝结果（修改前）')
+    axes[0, 1].axis('off')
+    
+    axes[0, 2].imshow(result_deep, cmap='gray')
+    axes[0, 2].set_title('深拷贝结果（修改前）')
+    axes[0, 2].axis('off')
+    
+    axes[1, 0].imshow(img_gray, cmap='gray')
+    axes[1, 0].set_title('原图（已修改）')
+    axes[1, 0].axis('off')
+    
+    axes[1, 1].imshow(result_shallow_after, cmap='gray')
+    axes[1, 1].set_title('浅拷贝结果（修改后）\n受原图影响变化了')
+    axes[1, 1].axis('off')
+    
+    axes[1, 2].imshow(result_deep_after, cmap='gray')
+    axes[1, 2].set_title('深拷贝结果（修改后）\n保持原样不变')
+    axes[1, 2].axis('off')
+    
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    # 演示深浅拷贝的区别
+    img_original, shallow, deep = demonstrate_shallow_vs_deep_copy()
+    
+    # 测试深浅拷贝对阈值处理的影响
+    print("\n" + "=" * 50)
+    print("测试深浅拷贝对阈值处理的影响：")
+    test_copy_on_threshold(img_original)
+    
+    # 总结
+    print("\n" + "=" * 50)
+    print("总结：")
+    print("1. 浅拷贝只是引用，修改原图会影响浅拷贝结果")
+    print("2. 深拷贝创建独立数据副本，修改原图不影响深拷贝")
+    print("3. 使用 .copy() 或 np.copy() 创建深拷贝")
+    print("4. 直接赋值 (=) 创建浅拷贝")
+
+
+#需要保留原始数据时：使用深拷贝
+#临时处理且不关心原始数据时：可以使用浅拷贝
+#性能敏感场景：浅拷贝更快，但要注意数据独立性
