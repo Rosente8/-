@@ -1,1 +1,116 @@
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
 
+def manual_threshold(img_gray, threshold):
+    """
+    手动实现阈值函数
+    
+    参数:
+        img_gray: 灰度图像
+        threshold: 阈值 (0-255)
+    返回:
+        二值化后的图像
+    """
+    # 创建结果图像（与原图同尺寸，单通道）
+    height, width = img_gray.shape
+    result = np.zeros((height, width), dtype=np.uint8)
+    
+    # 遍历每一个像素
+    for i in range(height):
+        for j in range(width):
+            if img_gray[i, j] > threshold:
+                result[i, j] = 255  # 白色
+            else:
+                result[i, j] = 0    # 黑色
+    
+    return result
+
+def compare_thresholds(img_gray, thresholds):
+    """
+    比较不同阈值的效果
+    """
+    plt.figure(figsize=(15, 10))
+    
+    # 显示原灰度图
+    plt.subplot(2, 3, 1)
+    plt.imshow(img_gray, cmap='gray')
+    plt.title('原始灰度图像')
+    plt.axis('off')
+    
+    # 对每个阈值进行处理和显示
+    for idx, thresh in enumerate(thresholds, start=2):
+        result = manual_threshold(img_gray, thresh)
+        
+        plt.subplot(2, 3, idx)
+        plt.imshow(result, cmap='gray')
+        plt.title(f'阈值 = {thresh}')
+        plt.axis('off')
+    
+    plt.tight_layout()
+    plt.show()
+
+def analyze_threshold_effect(img_gray):
+    """
+    分析阈值对图像的影响
+    """
+    # 计算直方图
+    hist = cv.calcHist([img_gray], [0], None, [256], [0, 256])
+    
+    # 创建图形
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    
+    # 显示直方图
+    axes[0, 0].plot(hist, color='black')
+    axes[0, 0].set_title('灰度直方图')
+    axes[0, 0].set_xlabel('像素值')
+    axes[0, 0].set_ylabel('像素数量')
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    # 测试不同阈值
+    test_thresholds = [50, 100, 128, 150, 200]
+    
+    for idx, thresh in enumerate(test_thresholds, start=1):
+        result = manual_threshold(img_gray, thresh)
+        
+        row = (idx) // 3
+        col = (idx) % 3
+        axes[row, col].imshow(result, cmap='gray')
+        axes[row, col].set_title(f'阈值 = {thresh}')
+        axes[row, col].axis('off')
+    
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    # 读取图像（使用任务二处理后的平均图像）
+    img_color = cv.imread('/home/rosent/Pictures/2.png')
+    if img_color is None:
+        print("错误：无法读取图像")
+        exit()
+    
+    # 先转换为灰度图（或者使用任务二的结果）
+    img_gray = cv.cvtColor(img_color, cv.COLOR_BGR2GRAY)
+    
+    # 比较不同阈值
+    thresholds = [50, 100, 128, 150, 200]
+    compare_thresholds(img_gray, thresholds)
+    
+    # 分析阈值效果
+    analyze_threshold_effect(img_gray)
+    
+    # 对比OpenCV的threshold函数
+    print("对比手动实现与OpenCV内置函数：")
+    threshold = 128
+    
+    # 手动实现
+    manual_result = manual_threshold(img_gray, threshold)
+    
+    # OpenCV内置函数
+    _, opencv_result = cv.threshold(img_gray, threshold, 255, cv.THRESH_BINARY)
+    
+    # 检查是否相同
+    if np.array_equal(manual_result, opencv_result):
+        print(f"✓ 阈值{threshold}：手动实现与OpenCV结果一致")
+    else:
+        print(f"✗ 阈值{threshold}：结果不一致")
