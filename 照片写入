@@ -1,1 +1,28 @@
+import cv2
 
+# 1. 使用imread读取图片
+print("正在读取图片...")
+img = cv2.imread('/home/rosent/Pictures/6-1.jpg')
+
+# 检查图片是否读取成功
+if img is None:
+    print("错误：无法读取图片！")
+    print("请确保 test.jpg 文件存在于当前目录")
+else:
+    print("图片读取成功！")
+    
+    # 获取图片信息
+    height, width = img.shape[:2]
+    print(f"图片尺寸: {width} x {height} 像素")
+    
+    # 2. 使用imshow显示图片
+    print("显示图片中...")
+    cv2.imshow('My Image', img)
+    
+    # 3. 等待按键
+    print("按任意键关闭图片窗口...")
+    cv2.waitKey(0)
+    
+    # 4. 关闭所有窗口
+    cv2.destroyAllWindows()
+    print("程序结束")
